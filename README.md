@@ -1,4 +1,4 @@
-# AutoGPT: Build & Use AI Agents
+# Stripped version for corporate: AutoGPT: Build & Use AI Agents
 
 [![Discord Follow](https://dcbadge.vercel.app/api/server/autogpt?style=flat)](https://discord.gg/autogpt) &ensp;
 [![Twitter Follow](https://img.shields.io/twitter/follow/Auto_GPT?style=social)](https://twitter.com/Auto_GPT) &ensp;
