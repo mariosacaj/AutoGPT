@@ -3,10 +3,8 @@ from enum import Enum
 from json import JSONDecodeError
 from typing import Any, List, NamedTuple
 
-import anthropic
 import ollama
 import openai
-from groq import Groq
 
 from autogpt_server.data.block import Block, BlockCategory, BlockOutput, BlockSchema
 from autogpt_server.data.model import BlockSecret, SchemaField, SecretField
@@ -34,19 +32,19 @@ class LlmModel(str, Enum):
     GPT4O = "gpt-4o"
     GPT4_TURBO = "gpt-4-turbo"
     GPT3_5_TURBO = "gpt-3.5-turbo"
-    # Anthropic models
-    CLAUDE_3_5_SONNET = "claude-3-5-sonnet-20240620"
-    CLAUDE_3_HAIKU = "claude-3-haiku-20240307"
-    # Groq models
-    LLAMA3_8B = "llama3-8b-8192"
-    LLAMA3_70B = "llama3-70b-8192"
-    MIXTRAL_8X7B = "mixtral-8x7b-32768"
-    GEMMA_7B = "gemma-7b-it"
-    GEMMA2_9B = "gemma2-9b-it"
-    # New Groq models (Preview)
-    LLAMA3_1_405B = "llama-3.1-405b-reasoning"
-    LLAMA3_1_70B = "llama-3.1-70b-versatile"
-    LLAMA3_1_8B = "llama-3.1-8b-instant"
+    # # Anthropic models
+    # CLAUDE_3_5_SONNET = "claude-3-5-sonnet-20240620"
+    # CLAUDE_3_HAIKU = "claude-3-haiku-20240307"
+    # # Groq models
+    # LLAMA3_8B = "llama3-8b-8192"
+    # LLAMA3_70B = "llama3-70b-8192"
+    # MIXTRAL_8X7B = "mixtral-8x7b-32768"
+    # GEMMA_7B = "gemma-7b-it"
+    # GEMMA2_9B = "gemma2-9b-it"
+    # # New Groq models (Preview)
+    # LLAMA3_1_405B = "llama-3.1-405b-reasoning"
+    # LLAMA3_1_70B = "llama-3.1-70b-versatile"
+    # LLAMA3_1_8B = "llama-3.1-8b-instant"
     # Ollama models
     OLLAMA_LLAMA3_8B = "llama3"
     OLLAMA_LLAMA3_405B = "llama3.1:405b"
@@ -61,17 +59,17 @@ MODEL_METADATA = {
     LlmModel.GPT4O: ModelMetadata("openai", 128000, cost_factor=12),
     LlmModel.GPT4_TURBO: ModelMetadata("openai", 128000, cost_factor=11),
     LlmModel.GPT3_5_TURBO: ModelMetadata("openai", 16385, cost_factor=8),
-    LlmModel.CLAUDE_3_5_SONNET: ModelMetadata("anthropic", 200000, cost_factor=14),
-    LlmModel.CLAUDE_3_HAIKU: ModelMetadata("anthropic", 200000, cost_factor=13),
-    LlmModel.LLAMA3_8B: ModelMetadata("groq", 8192, cost_factor=6),
-    LlmModel.LLAMA3_70B: ModelMetadata("groq", 8192, cost_factor=9),
-    LlmModel.MIXTRAL_8X7B: ModelMetadata("groq", 32768, cost_factor=7),
-    LlmModel.GEMMA_7B: ModelMetadata("groq", 8192, cost_factor=6),
-    LlmModel.GEMMA2_9B: ModelMetadata("groq", 8192, cost_factor=7),
-    LlmModel.LLAMA3_1_405B: ModelMetadata("groq", 8192, cost_factor=10),
+    #LlmModel.CLAUDE_3_5_SONNET: ModelMetadata("anthropic", 200000, cost_factor=14),
+    #LlmModel.CLAUDE_3_HAIKU: ModelMetadata("anthropic", 200000, cost_factor=13),
+    #LlmModel.LLAMA3_8B: ModelMetadata("groq", 8192, cost_factor=6),
+    #LlmModel.LLAMA3_70B: ModelMetadata("groq", 8192, cost_factor=9),
+    #LlmModel.MIXTRAL_8X7B: ModelMetadata("groq", 32768, cost_factor=7),
+    #LlmModel.GEMMA_7B: ModelMetadata("groq", 8192, cost_factor=6),
+    #LlmModel.GEMMA2_9B: ModelMetadata("groq", 8192, cost_factor=7),
+    #LlmModel.LLAMA3_1_405B: ModelMetadata("groq", 8192, cost_factor=10),
     # Limited to 16k during preview
-    LlmModel.LLAMA3_1_70B: ModelMetadata("groq", 131072, cost_factor=15),
-    LlmModel.LLAMA3_1_8B: ModelMetadata("groq", 131072, cost_factor=13),
+    #LlmModel.LLAMA3_1_70B: ModelMetadata("groq", 131072, cost_factor=15),
+    #LlmModel.LLAMA3_1_8B: ModelMetadata("groq", 131072, cost_factor=13),
     LlmModel.OLLAMA_LLAMA3_8B: ModelMetadata("ollama", 8192, cost_factor=7),
     LlmModel.OLLAMA_LLAMA3_405B: ModelMetadata("ollama", 8192, cost_factor=11),
 }
@@ -85,7 +83,7 @@ class AIStructuredResponseGeneratorBlock(Block):
     class Input(BlockSchema):
         prompt: str
         expected_format: dict[str, str]
-        model: LlmModel = LlmModel.GPT4_TURBO
+        model: LlmModel = LlmModel.GPT4O
         api_key: BlockSecret = SecretField(value="")
         sys_prompt: str = ""
         retry: int = 3
@@ -134,43 +132,6 @@ class AIStructuredResponseGeneratorBlock(Block):
             openai.api_key = api_key
             response_format = {"type": "json_object"} if json_format else None
             response = openai.chat.completions.create(
-                model=model.value,
-                messages=prompt,  # type: ignore
-                response_format=response_format,  # type: ignore
-            )
-            return response.choices[0].message.content or ""
-        elif provider == "anthropic":
-            system_messages = [p["content"] for p in prompt if p["role"] == "system"]
-            sysprompt = " ".join(system_messages)
-
-            messages = []
-            last_role = None
-            for p in prompt:
-                if p["role"] in ["user", "assistant"]:
-                    if p["role"] != last_role:
-                        messages.append({"role": p["role"], "content": p["content"]})
-                        last_role = p["role"]
-                    else:
-                        # If the role is the same as the last one, combine the content
-                        messages[-1]["content"] += "\n" + p["content"]
-
-            client = anthropic.Anthropic(api_key=api_key)
-            try:
-                response = client.messages.create(
-                    model=model.value,
-                    max_tokens=4096,
-                    system=sysprompt,
-                    messages=messages,
-                )
-                return response.content[0].text if response.content else ""
-            except anthropic.APIError as e:
-                error_message = f"Anthropic API error: {str(e)}"
-                logger.error(error_message)
-                raise ValueError(error_message)
-        elif provider == "groq":
-            client = Groq(api_key=api_key)
-            response_format = {"type": "json_object"} if json_format else None
-            response = client.chat.completions.create(
                 model=model.value,
                 messages=prompt,  # type: ignore
                 response_format=response_format,  # type: ignore
@@ -289,7 +250,7 @@ class AIStructuredResponseGeneratorBlock(Block):
 class AITextGeneratorBlock(Block):
     class Input(BlockSchema):
         prompt: str
-        model: LlmModel = LlmModel.GPT4_TURBO
+        model: LlmModel = LlmModel.GPT4O
         api_key: BlockSecret = SecretField(value="")
         sys_prompt: str = ""
         retry: int = 3
@@ -337,7 +298,7 @@ class AITextGeneratorBlock(Block):
 class AITextSummarizerBlock(Block):
     class Input(BlockSchema):
         text: str
-        model: LlmModel = LlmModel.GPT4_TURBO
+        model: LlmModel = LlmModel.GPT4O
         api_key: BlockSecret = SecretField(value="")
         # TODO: Make this dynamic
         max_tokens: int = 4000  # Adjust based on the model's context window
@@ -533,22 +494,6 @@ class AIConversationBlock(Block):
         if provider == "openai":
             openai.api_key = api_key
             response = openai.chat.completions.create(
-                model=model.value,
-                messages=messages,  # type: ignore
-                max_tokens=max_tokens,
-            )
-            return response.choices[0].message.content or ""
-        elif provider == "anthropic":
-            client = anthropic.Anthropic(api_key=api_key)
-            response = client.messages.create(
-                model=model.value,
-                max_tokens=max_tokens or 4096,
-                messages=messages,  # type: ignore
-            )
-            return response.content[0].text if response.content else ""
-        elif provider == "groq":
-            client = Groq(api_key=api_key)
-            response = client.chat.completions.create(
                 model=model.value,
                 messages=messages,  # type: ignore
                 max_tokens=max_tokens,

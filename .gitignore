@@ -8,6 +8,7 @@ auto_gpt_workspace/*
 azure.yaml
 .vscode
 .idea/*
+**/.idea/*
 auto-gpt.json
 log.txt
 log-ingestion.txt

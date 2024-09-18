@@ -1,0 +1,8 @@
+colorama==0.4.6
+google-cloud-logging==3.8.0
+pydantic==2.8.2
+pydantic-settings==2.5.2
+pyjwt==2.8.0
+# Specify the Python version separately in your environment configuration (e.g., Dockerfile or runtime.txt)
+python-dotenv==1.0.1
+supabase==2.7.2

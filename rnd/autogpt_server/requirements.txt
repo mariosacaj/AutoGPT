@@ -1,0 +1,42 @@
+aio-pika==9.4.3
+apscheduler==3.10.4
+# autogpt-libs is a local path dependency, handle it manually if needed.
+click==8.1.7
+croniter==2.0.5
+discord-py==2.4.0
+expiringdict==1.2.2
+fastapi==0.109.0
+feedparser==6.0.11
+flake8==7.0.0
+google-api-python-client==2.142.0
+google-auth-oauthlib==1.2.1
+jinja2==3.1.4
+jsonref==1.1.0
+jsonschema==4.22.0
+ollama==0.3.0
+openai==1.35.7
+praw==7.7.1
+prisma==0.13.1
+psutil==5.9.8
+pydantic==2.7.2
+pydantic-settings==2.3.4
+pyro5==5.15
+pytest==8.2.1
+pytest-asyncio==0.23.7
+python-dotenv==1.0.1
+redis==5.0.8
+sentry-sdk==1.45.0
+supabase==2.7.2
+tenacity==8.3.0
+uvicorn[standard]==0.30.1
+websockets==12.0
+youtube-transcript-api==0.6.2
+
+
+##### for autogpt-libs to run
+colorama==0.4.6
+google-cloud-logging==3.8.0
+pyjwt==2.8.0
+
+
+#For autogpt-libs, you’ll need to install it separately with pip install -e ../autogpt_libs, as local path dependencies are not supported in requirements.txt.
