@@ -2,8 +2,8 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from multiprocessing import Manager
 from typing import Any, Generic, TypeVar
-
-from prisma.enums import AgentExecutionStatus
+#   from prisma.enums import AgentExecutionStatus
+from enum import Enum
 from prisma.models import (
     AgentGraphExecution,
     AgentNodeExecution,
@@ -34,6 +34,14 @@ class NodeExecution(BaseModel):
     node_exec_id: str
     node_id: str
     data: BlockInput
+
+class AgentExecutionStatus(str, Enum):
+    INCOMPLETE = "INCOMPLETE"
+    QUEUED = "QUEUED"
+    RUNNING = "RUNNING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+
 
 
 ExecutionStatus = AgentExecutionStatus

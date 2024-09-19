@@ -5,7 +5,8 @@ from typing import Any, Optional, Type
 
 import prisma.errors
 from prisma import Json
-from prisma.enums import UserBlockCreditType
+# from prisma.enums import UserBlockCreditType
+# from enum import StrEnum python >= 3.11
 from prisma.models import UserBlockCredit
 from pydantic import BaseModel
 
@@ -21,6 +22,11 @@ from autogpt_server.data.block import Block, BlockInput
 from autogpt_server.util.settings import Config
 
 
+class UserBlockCreditType(str, Enum):
+    TOP_UP = "TOP_UP"
+    USAGE = "USAGE"
+
+
 class BlockCostType(str, Enum):
     RUN = "run"  # cost X credits per run
     BYTE = "byte"  # cost X credits per byte
@@ -33,11 +39,11 @@ class BlockCost(BaseModel):
     cost_type: BlockCostType
 
     def __init__(
-        self,
-        cost_amount: int,
-        cost_type: BlockCostType = BlockCostType.RUN,
-        cost_filter: Optional[BlockInput] = None,
-        **data: Any,
+            self,
+            cost_amount: int,
+            cost_type: BlockCostType = BlockCostType.RUN,
+            cost_filter: Optional[BlockInput] = None,
+            **data: Any,
     ) -> None:
         super().__init__(
             cost_amount=cost_amount,
@@ -86,13 +92,13 @@ class UserCreditBase(ABC):
 
     @abstractmethod
     async def spend_credits(
-        self,
-        user_id: str,
-        user_credit: int,
-        block: Block,
-        input_data: BlockInput,
-        data_size: float,
-        run_time: float,
+            self,
+            user_id: str,
+            user_credit: int,
+            block: Block,
+            input_data: BlockInput,
+            data_size: float,
+            run_time: float,
     ) -> int:
         """
         Spend the credits for the user based on the block usage.
@@ -165,10 +171,10 @@ class UserCredit(UserCreditBase):
 
     @staticmethod
     def _block_usage_cost(
-        block: Block,
-        input_data: BlockInput,
-        data_size: float,
-        run_time: float,
+            block: Block,
+            input_data: BlockInput,
+            data_size: float,
+            run_time: float,
     ) -> tuple[int, BlockInput]:
         block_costs = BLOCK_COSTS.get(type(block))
         if not block_costs:
@@ -194,14 +200,14 @@ class UserCredit(UserCreditBase):
         return 0, {}
 
     async def spend_credits(
-        self,
-        user_id: str,
-        user_credit: int,
-        block: Block,
-        input_data: BlockInput,
-        data_size: float,
-        run_time: float,
-        validate_balance: bool = True,
+            self,
+            user_id: str,
+            user_credit: int,
+            block: Block,
+            input_data: BlockInput,
+            data_size: float,
+            run_time: float,
+            validate_balance: bool = True,
     ) -> int:
         cost, matching_filter = self._block_usage_cost(
             block=block, input_data=input_data, data_size=data_size, run_time=run_time

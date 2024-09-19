@@ -1,7 +1,7 @@
 // THIS FILE IS AUTO-GENERATED, RUN `poetry run schema` TO UPDATE
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:./dev.db"
 }
 
 generator client {
@@ -118,13 +118,14 @@ model AgentBlock {
 }
 
 // This model describes the status of an AgentGraphExecution or AgentNodeExecution.
-enum AgentExecutionStatus {
-  INCOMPLETE
-  QUEUED
-  RUNNING
-  COMPLETED
-  FAILED
-}
+// TODO: Enable for postgres support
+// enum AgentExecutionStatus {
+//   INCOMPLETE
+//   QUEUED
+//   RUNNING
+//   COMPLETED
+//   FAILED
+// }
 
 // This model describes the execution of an AgentGraph.
 model AgentGraphExecution {
@@ -133,7 +134,11 @@ model AgentGraphExecution {
   updatedAt DateTime? @updatedAt
   startedAt DateTime?
 
-  executionStatus AgentExecutionStatus @default(COMPLETED)
+  // TODO: Enable for postgres support
+  //executionStatus AgentExecutionStatus @default(COMPLETED)
+  // Store status as a string, workaround for SQLite
+  executionStatus String   @default("COMPLETED")
+
 
   agentGraphId      String
   agentGraphVersion Int        @default(1)
@@ -146,6 +151,9 @@ model AgentGraphExecution {
   user   User   @relation(fields: [userId], references: [id])
 
   stats String? // JSON serialized object
+
+
+
 }
 
 // This model describes the execution of an AgentNode.
@@ -161,7 +169,11 @@ model AgentNodeExecution {
   Input  AgentNodeExecutionInputOutput[] @relation("AgentNodeExecutionInput")
   Output AgentNodeExecutionInputOutput[] @relation("AgentNodeExecutionOutput")
 
-  executionStatus AgentExecutionStatus @default(COMPLETED)
+  // TODO: Enable for postgres support
+  //executionStatus AgentExecutionStatus @default(COMPLETED)
+  // Store status as a string, workaround for SQLite
+  executionStatus String   @default("COMPLETED")
+
   // Final JSON serialized input data for the node execution.
   executionData   String?
   addedTime       DateTime             @default(now())
@@ -217,7 +229,7 @@ model AgentGraphExecutionSchedule {
 model AnalyticsDetails {
   // PK uses gen_random_uuid() to allow the db inserts to happen outside of prisma
   // typical uuid() inserts are handled by prisma
-  id String @id @default(dbgenerated("gen_random_uuid()"))
+  id String @id @default(uuid())
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -230,17 +242,20 @@ model AnalyticsDetails {
   type String
 
   // Analytic Specific Data. We should use a union type here, but prisma doesn't support it.
-  data Json?
+  // TODO: Enable for postgres support
+  // data Json
+  // JSON serialized dict[str, str] containing the node metadata.
+  data String @default("{}")
 
   // Indexable field for any count based analytical measures like page order clicking, tutorial step completion, etc.
   dataIndex String?
 
-  @@index([userId, type], name: "analyticsDetails")
+  @@index([userId, type])
   @@index([type])
 }
 
 model AnalyticsMetrics {
-  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -257,10 +272,11 @@ model AnalyticsMetrics {
   user   User   @relation(fields: [userId], references: [id])
 }
 
-enum UserBlockCreditType {
-  TOP_UP
-  USAGE
-}
+// TODO: Enable for postgres support
+// enum UserBlockCreditType {
+//   TOP_UP
+//   USAGE
+// }
 
 model UserBlockCredit {
   transactionKey String   @default(uuid())
@@ -273,10 +289,17 @@ model UserBlockCredit {
   block   AgentBlock? @relation(fields: [blockId], references: [id])
 
   amount Int
-  type   UserBlockCreditType
+
+  // TODO: Enable for postgres support
+  //type   UserBlockCreditType
+  type String
 
   isActive Boolean @default(true)
-  metadata Json?
+
+  // TODO: Enable for postgres support
+  //metadata Json?
+  // JSON serialized dict[str, str] containing the node metadata.
+  metadata String @default("{}")
 
   @@id(name: "creditTransactionIdentifier", [transactionKey, userId])
 }

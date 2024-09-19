@@ -4,7 +4,8 @@ import os
 from abc import ABC, abstractmethod
 from datetime import datetime
 
-from redis.asyncio import Redis
+# from redis.asyncio import Redis
+from fakeredis.aioredis import FakeRedis
 
 from autogpt_server.data.execution import ExecutionResult
 
@@ -47,7 +48,7 @@ class AsyncRedisEventQueue(AsyncEventQueue):
 
     async def connect(self):
         if not self.connection:
-            self.connection = Redis(
+            self.connection = FakeRedis(
                 host=self.host,
                 port=self.port,
                 password=self.password,
